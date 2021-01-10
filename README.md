@@ -16,6 +16,13 @@ Axios é uma ferramenta importante para requisitar serviços de forma rápida e 
 npm install axios
 ```
 
+# Alertas no aplicativo
+
+O react-bs-notifier é uma dependência utilizada para criar notificações no aplivatico. Está sendo utilizado para, em caso de erro ou sucesso, mostrar alguma mensagem amigável para o usuário. O link do git é:
+```
+https://github.com/chadly/react-bs-notifier
+```
+
 # About
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
