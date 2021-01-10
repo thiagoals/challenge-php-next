@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, {useState} from 'react';
 import {Container, Row, Col, Jumbotron, Button, Navbar, Card, Form} from 'react-bootstrap';
@@ -7,8 +8,28 @@ import {Container, Row, Col, Jumbotron, Button, Navbar, Card, Form} from 'react-
 
 export default function Home() {
   
-  const [email,setEmail] = useState('')
-  const [senha,setSenha] = useState('')
+  const router = useRouter();
+  const [email,setEmail] = useState('');
+  const [senha,setSenha] = useState('');
+
+  const login = () => {
+    // Vamos pegar esses dados e utilizar o AXIOS para mandar um post e receber o nosso token em caso de usuário ou senha incorretos
+    const axios = require('axios').default;
+    axios.post('http://localhost:8082/authentication/login',{
+      email:email,
+      senha:senha
+    }).then(function(response){
+      localStorage.setItem('UserData',response.data.token);
+      localStorage.setItem('Nome',response.data.nome);
+      // Caso esteja correto, iremos levar para a página de admin
+      router.push('/admin');
+    }).catch(function(err){
+      // Fazer tratamento de erros
+      // 422 - Email e/ou senha em formato incorreto
+      console.log(err.response.status);
+    });
+  }
+
   return (
     <Container fluid style={{marginLeft:'0px',marginRight:'0px'}}>
       <Head>
@@ -54,7 +75,7 @@ export default function Home() {
                         Você esqueceu sua senha? Clique <Link href="https://www.google.com.br/">aqui</Link>.
                       </Form.Text>
                     </Form.Group>
-                    <Button variant="primary" onClick={()=>login({email:email,senha:senha})}>Fazer login</Button>
+                    <Button variant="primary" onClick={login}>Fazer login</Button>
                     &nbsp;&nbsp;&nbsp;
                     <Link href="https://www.google.com.br/">
                       <Button variant="primary">Voltar</Button>
@@ -68,21 +89,4 @@ export default function Home() {
       </Row>
     </Container>
   )
-}
-
-function login(userData){
-  // Vamos pegar esses dados e utilizar o AXIOS para mandar um post e receber o nosso token em caso de usuário ou senha incorretos
-  const axios = require('axios').default;
-  axios.post('http://localhost:8082/authentication/login',{
-    email:userData.email,
-    senha:userData.senha
-  }).then(function(response){
-    localStorage.setItem('UserData',response.data.token);
-    localStorage.setItem('Nome',response.data.nome);
-    console.log(response.data);
-  }).catch(function(err){
-    // Fazer tratamento de erros
-    // 422 - Email e/ou senha em formato incorreto
-    console.log(err.response.status);
-  });
 }
