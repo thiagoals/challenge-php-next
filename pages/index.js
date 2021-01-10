@@ -1,11 +1,16 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Container, Row, Col, Jumbotron, Button, Navbar, Card} from 'react-bootstrap';
+import React, {useState} from 'react';
+import {Container, Row, Col, Jumbotron, Button, Navbar, Card, Form} from 'react-bootstrap';
+
 
 export default function Home() {
+  
+  const [email,setEmail] = useState('')
+  const [senha,setSenha] = useState('')
   return (
-    <Container fluid style={{marginLeft:'0px',marginRight:'0px',padding:'0px'}}>
+    <Container fluid style={{marginLeft:'0px',marginRight:'0px'}}>
       <Head>
         <title>Challenge-php, an ultimate challenge for PHP Developers</title>
         <link rel="icon" href="/favicon.ico" />
@@ -33,12 +38,28 @@ export default function Home() {
                 <Card.Header><h3>Área restrita</h3></Card.Header>
                 <Card.Body>
                   <Card.Title>Digite seu E-mail e Senha para continuar.</Card.Title>
-
-                  <Button variant="primary">Fazer login</Button>
-                  &nbsp;&nbsp;&nbsp;
-                  <Link href="https://www.google.com.br/">
-                    <Button variant="primary">Voltar</Button>
-                  </Link>
+                  <br/>
+                  <Form>
+                    <Form.Group controlId="formBasicEmail">
+                      <div align="left">&nbsp;<Form.Label>Endereço de e-mail:</Form.Label></div>
+                      <Form.Control type="email" placeholder="Digite seu e-mail aqui" onChange={event=>setEmail(event.target.value)} />
+                      <Form.Text className="text-muted">
+                        Nós nunca iremos compartilhar seu e-mail com ninguém ;)
+                      </Form.Text>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicPassword">
+                    <div align="left">&nbsp;<Form.Label>Senha:</Form.Label></div>
+                      <Form.Control type="password" placeholder="Digite sua senha aqui" onChange={event=>setSenha(event.target.value)} />
+                      <Form.Text className="text-muted">
+                        Você esqueceu sua senha? Clique <Link href="https://www.google.com.br/">aqui</Link>.
+                      </Form.Text>
+                    </Form.Group>
+                    <Button variant="primary" onClick={()=>login({email:email,senha:senha})}>Fazer login</Button>
+                    &nbsp;&nbsp;&nbsp;
+                    <Link href="https://www.google.com.br/">
+                      <Button variant="primary">Voltar</Button>
+                    </Link>
+                  </Form>
                 </Card.Body>
               </Card>
             </Col>
@@ -47,4 +68,21 @@ export default function Home() {
       </Row>
     </Container>
   )
+}
+
+function login(userData){
+  // Vamos pegar esses dados e utilizar o AXIOS para mandar um post e receber o nosso token em caso de usuário ou senha incorretos
+  const axios = require('axios').default;
+  axios.post('http://localhost:8082/authentication/login',{
+    email:userData.email,
+    senha:userData.senha
+  }).then(function(response){
+    localStorage.setItem('UserData',response.data.token);
+    localStorage.setItem('Nome',response.data.nome);
+    console.log(response.data);
+  }).catch(function(err){
+    // Fazer tratamento de erros
+    // 422 - Email e/ou senha em formato incorreto
+    console.log(err.response.status);
+  });
 }

@@ -9,6 +9,13 @@ Esta aplicação utiliza o React-bootstrap, um framework frontend do Bootstrap p
 https://react-bootstrap.github.io/
 ```
 
+# Axios
+
+Axios é uma ferramenta importante para requisitar serviços de forma rápida e fácil. Utilizamos o npm para instalar a dependência:
+```
+npm install axios
+```
+
 # About
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
