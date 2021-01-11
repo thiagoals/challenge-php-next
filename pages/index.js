@@ -70,7 +70,7 @@ export default function Home() {
           <title>Challenge-php, an ultimate challenge for PHP Developers</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Row fluid>
+        <Row>
           <Navbar bg="dark" variant="dark" style={{width:'100%'}}>
             <Navbar.Brand href="#home">
               <img

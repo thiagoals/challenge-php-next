@@ -10,10 +10,13 @@
   "dependencies": {
     "axios": "^0.21.1",
     "bootstrap": "^4.5.3",
+    "formidable": "^1.2.2",
+    "moment": "^2.29.1",
     "next": "10.0.5",
     "react": "17.0.1",
     "react-bootstrap": "^1.4.3",
     "react-bs-notifier": "^6.0.0",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "slugify": "^1.4.6"
   }
 }
