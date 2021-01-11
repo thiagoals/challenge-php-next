@@ -23,6 +23,19 @@ O react-bs-notifier é uma dependência utilizada para criar notificações no a
 https://github.com/chadly/react-bs-notifier
 ```
 
+# Serviço de upload de arquivos XML
+
+Foi criado um serviço dentro do NEXTJS para envio de imagens para dentro da pasta public, juntamente com a data do envio e  os arquivos enviados. Ele só aceita arquivos xml. Alguns pacotes foram usados neste serviço, entre eles:
+```
+npm install slugify - para criar o slug do arquivo
+```
+```
+npm install moment - para criar a pasta com a data atual (DD-MM-YYYY)
+```
+```
+npm install formidable - para fazer o upload do arquivo
+```
+
 # About
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
