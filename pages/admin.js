@@ -22,6 +22,10 @@ class Admin extends Component {
 
     fileUploadHandler = () => {
         console.log('Fazendo o upload do arquivo');
+        let token;
+        if (typeof window !== 'undefined') {
+            token = localStorage.getItem("UserData");
+        }
         var form = new FormData();
         form.append('xml',this.state.selectedFile, this.state.selectedFile.name);
         // Só aceitamos a extensão xml
@@ -30,9 +34,12 @@ class Admin extends Component {
                 method:"POST",
                 data:form,
                 "content-type": "multipart/form-data",
-            }).then((res)=>{
-                console.log(res);
-            }).catch((err)=>{
+                headers:{
+                    Authorization:'Bearer ' + token
+                }
+            }).then(()=>{
+                this.showAlert('success','Tudo certo!','Seu arquivo foi enviado para o servidor. Aguarde até processarmos os dados.');
+            }).catch(()=>{
                 this.showAlert('danger','Ops! Ocorreu um erro.','Ocorreu um erro ao tentar enviar o arquivo para o servidor.');
             });
         }else{
