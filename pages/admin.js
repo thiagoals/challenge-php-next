@@ -1,7 +1,7 @@
 import { withRouter } from 'next/router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React,{Component, useState, getState} from 'react';
-import {Container, Nav, Navbar, Breadcrumb, Card, Button, Row, Col, Form} from 'react-bootstrap';
+import {Container, Nav, Navbar, Breadcrumb, Card, Button, Row, Form, Table, Spinner} from 'react-bootstrap';
 import axios from 'axios';
 import { AlertList } from "react-bs-notifier";
 
@@ -9,7 +9,28 @@ class Admin extends Component {
     state = {
         selectedFile: null,
         alerts: [],
-        label: 'Buscar aquivo XML'
+        label: 'Buscar aquivo XML',
+        showResults:true,
+        pessoas: [],
+    }
+
+    async componentDidMount() {
+        let token;
+        if (typeof window !== 'undefined') {
+            token = localStorage.getItem("UserData");
+        }
+        let response = await axios('http://localhost:8080/pessoas/get',{
+            method:'GET',
+            "content-type": "application/json",
+            headers: {
+                Authorization: 'Bearer '+token
+            }
+        }).then(response=>response);
+        console.log(JSON.parse(response.data.pessoas));
+        this.setState({
+            showResults:false,
+            pessoas:JSON.parse(response.data.pessoas)
+        });
     }
 
     fileSelectHandler = event => {
@@ -78,6 +99,14 @@ class Admin extends Component {
             this.props.router.push('/');
         }
 
+        this.pessoas = this.state.pessoas.map((pessoa)=>
+            <tr>
+                <td>{pessoa.id}</td>
+                <td>{pessoa.nome}</td>
+                <td><Button style={{marginTop:'10px'}} variant="primary">+</Button></td>
+            </tr>
+        );
+
         return(
             <>
                 <AlertList
@@ -88,24 +117,24 @@ class Admin extends Component {
                 />
                 <Container fluid style={{marginLeft:'0px',marginRight:'0px', padding:'0px'}}>
                     <Row style={{margin:'0px'}} fluid>
-                    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark" style={{width:'100%'}}>
-                        <Navbar.Brand href="#home">
-                            <img alt=""
-                            src="https://images.gupy.io/unsafe/85x85/https://s3.amazonaws.com/gupy5/production/companies/1172/career/1825/images/2020-07-20_19-18_logo.png"
-                            width="30"
-                            height="30"
-                            className="d-inline-block align-top"
-                            />{' '}
-                            &nbsp;&nbsp;This is Invillia!
-                        </Navbar.Brand>
-                        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-                        <Navbar.Collapse id="responsive-navbar-nav">
-                            <Nav className="ml-auto">
-                                <Nav.Link style={{textAlign:'center'}}>E aí, {nome}!</Nav.Link>
-                                <Nav.Link style={{textAlign:'center'}} onClick={logout}>Sair</Nav.Link>
-                            </Nav>
-                        </Navbar.Collapse>
-                    </Navbar>
+                        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark" style={{width:'100%'}}>
+                            <Navbar.Brand href="#home">
+                                <img alt=""
+                                src="https://images.gupy.io/unsafe/85x85/https://s3.amazonaws.com/gupy5/production/companies/1172/career/1825/images/2020-07-20_19-18_logo.png"
+                                width="30"
+                                height="30"
+                                className="d-inline-block align-top"
+                                />{' '}
+                                &nbsp;&nbsp;This is Invillia!
+                            </Navbar.Brand>
+                            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                            <Navbar.Collapse id="responsive-navbar-nav">
+                                <Nav className="ml-auto">
+                                    <Nav.Link style={{textAlign:'center'}}>E aí, {nome}!</Nav.Link>
+                                    <Nav.Link style={{textAlign:'center'}} onClick={logout}>Sair</Nav.Link>
+                                </Nav>
+                            </Navbar.Collapse>
+                        </Navbar>
                     </Row>
                     
                     <Row style={{padding:'20px 5% 0px 5%', margin:'0px'}} fluid>
@@ -129,6 +158,38 @@ class Admin extends Component {
                                     />
                                 </Form>
                                 <Button style={{marginTop:'10px'}} variant="primary" onClick={this.fileUploadHandler}>Fazer upload</Button>
+                            </Card.Body>
+                        </Card>
+                    </Row>
+
+                    <Row style={{padding:'20px 5% 0px 5%', margin:'0px'}} fluid>
+                        <Card style={{width:'100%'}}>
+                            <Card.Header><h3>Visualização de dados</h3></Card.Header>
+                            <Card.Body>
+                                <Breadcrumb>
+                                    <Breadcrumb.Item>Admin</Breadcrumb.Item>
+                                    <Breadcrumb.Item active>Visualizar</Breadcrumb.Item>
+                                </Breadcrumb>
+                                <Card.Text style={{padding:'10px',textAlign:'justify'}}>
+                                    Aqui você pode visualizar os arquivos shiporders.xml e people.xml.
+                                </Card.Text>
+                                <Table striped bordered hover style={{textAlign:'center'}}>
+                                    
+                                    {this.state.showResults?<Spinner animation="grow" style={{margin:'25px'}} />:
+                                    <>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Nome</th>
+                                                <th>Mais</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.pessoas}
+                                        </tbody>
+                                    </>
+                                    }
+                                </Table>
                             </Card.Body>
                         </Card>
                     </Row>

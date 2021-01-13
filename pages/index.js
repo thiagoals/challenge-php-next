@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, {useState} from 'react';
-import {Container, Row, Col, Jumbotron, Button, Navbar, Card, Form} from 'react-bootstrap';
-import { AlertList, Alert, AlertContainer } from "react-bs-notifier";
+import {Container, Row, Col, Jumbotron, Button, Navbar, Card, Form,Spinner} from 'react-bootstrap';
+import { AlertList } from "react-bs-notifier";
 
 
 
@@ -14,8 +14,10 @@ export default function Home() {
 	const [alerts, setAlerts] = useState([]);
   const [email,setEmail] = useState('');
   const [senha,setSenha] = useState('');
+  const [load, setLoad] = React.useState(false)
 
   const login = () => {
+    setLoad(true);
     // Vamos pegar esses dados e utilizar o AXIOS para mandar um post e receber o nosso token em caso de usuário ou senha incorretos
     const axios = require('axios').default;
     axios.post('http://localhost:8082/authentication/login',{
@@ -24,6 +26,7 @@ export default function Home() {
     }).then(function(response){
       localStorage.setItem('UserData',response.data.token);
       localStorage.setItem('Nome',response.data.nome);
+      setLoad(false);
       // Caso esteja correto, iremos levar para a página de admin
       router.push('/admin');
     }).catch(function(err){
@@ -31,6 +34,7 @@ export default function Home() {
       // 422 - Email e/ou senha em formato incorreto
       console.log(err.response.status);
       generate('danger');
+      setLoad(false);
     });
   }
 
@@ -115,6 +119,7 @@ export default function Home() {
                         <Button variant="primary">Voltar</Button>
                       </Link>
                     </Form>
+                    {load?<Spinner animation="grow" style={{margin:'25px'}} />:null}
                   </Card.Body>
                 </Card>
               </Col>
