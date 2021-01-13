@@ -36,6 +36,9 @@ npm install moment - para criar a pasta com a data atual (DD-MM-YYYY)
 npm install formidable - para fazer o upload do arquivo
 ```
 
+# Alterando path de consumo dos serviços
+Dentro da pasta /page e /page/api, existem três arquivos que consomem serviços(admin,index e upload). Importante verificar a url caso você queira mudar algum dos serviços de porta, pois o mesmo utiliza localhost:porta para consumir os endpoins.
+
 # About
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
