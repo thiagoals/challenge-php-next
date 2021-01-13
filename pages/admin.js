@@ -1,7 +1,7 @@
 import { withRouter } from 'next/router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React,{Component, useState, getState} from 'react';
-import {Container, Nav, Navbar, Breadcrumb, Card, Button, Row, Form, Table, Spinner} from 'react-bootstrap';
+import {Container, Nav, Navbar, Breadcrumb, Card, Button, Row, Form, Table, Spinner,Modal} from 'react-bootstrap';
 import axios from 'axios';
 import { AlertList } from "react-bs-notifier";
 
@@ -12,6 +12,9 @@ class Admin extends Component {
         label: 'Buscar aquivo XML',
         showResults:true,
         pessoas: [],
+        ordens:[],
+        showOrders:true,
+        showModal:false,
     }
 
     async componentDidMount() {
@@ -25,8 +28,14 @@ class Admin extends Component {
             headers: {
                 Authorization: 'Bearer '+token
             }
-        }).then(response=>response);
-        console.log(JSON.parse(response.data.pessoas));
+        })
+        .then(response=>response)
+        .catch((err)=>{
+            this.showAlert('danger','Ops! O token expirou.','Faça o login para acessar a área de novo.');
+            localStorage.removeItem('Nome');
+            localStorage.removeItem('UserData');
+            this.props.router.push('/');
+        });
         this.setState({
             showResults:false,
             pessoas:JSON.parse(response.data.pessoas)
@@ -87,6 +96,38 @@ class Admin extends Component {
         })
     }
 
+    closeModal = () => {
+        this.setState({
+            showModal:false
+        })
+    }
+
+    async showModal(pessoa){
+        this.setState({
+            showModal:true,
+            showOrders:true
+        })
+        let response = await axios(`http://localhost:8080/ordens/get/${pessoa.id}`,{
+            method:'GET',
+            "content-type": "application/json",
+            headers: {
+                Authorization: 'Bearer '+ this.getToken()
+            }
+        }).then(response=>response);
+        this.setState({
+            ordens:JSON.parse(response.data.ordens),
+            showOrders:false
+        })
+    }
+
+    getToken = () =>{
+        let token;
+        if (typeof window !== 'undefined') {
+            token = localStorage.getItem("UserData");
+        }
+        return token;
+    }
+
     render(){
         let nome;
         if (typeof window !== 'undefined') {
@@ -98,17 +139,66 @@ class Admin extends Component {
             localStorage.removeItem('UserData');
             this.props.router.push('/');
         }
+        
+        this.ordens = this.state.ordens.map((ordem)=>
+            <tr>
+                <td>{ordem.id}</td>
+                <td>{ordem.titulo}</td>
+                <td>{ordem.descricao}</td>
+                <td>{ordem.quantidade}</td>
+                <td>{ordem.preco}</td>
+                <td>{ordem.nome}</td>
+                <td>{ordem.endereco}</td>
+                <td>{ordem.cidade}</td>
+                <td>{ordem.pais}</td>
+            </tr>
+        );  
 
         this.pessoas = this.state.pessoas.map((pessoa)=>
             <tr>
                 <td>{pessoa.id}</td>
                 <td>{pessoa.nome}</td>
-                <td><Button style={{marginTop:'10px'}} variant="primary">+</Button></td>
+                <td><Button style={{marginTop:'10px'}} variant="primary" onClick={()=>this.showModal(pessoa)}>+</Button></td>
             </tr>
         );
 
+
         return(
             <>
+                <Modal show={this.state.showModal} onHide={this.closeModal} animation={true}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Ordens/Pedidos</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Table striped bordered hover responsive style={{textAlign:'center'}}>
+                            {this.state.showOrders?<Spinner animation="grow" style={{margin:'25px'}} />:
+                            <>
+                                <thead>
+                                    <tr>
+                                        <th>Pedido nº</th>
+                                        <th>Título</th>
+                                        <th>Descrição</th>
+                                        <th>Quantidade</th>
+                                        <th>Preço</th>
+                                        <th>Nome</th>
+                                        <th>Endereço</th>
+                                        <th>Cidade</th>
+                                        <th>País</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.ordens}
+                                </tbody>
+                            </>
+                            }
+                        </Table>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={this.closeModal}>
+                            Fechar
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
                 <AlertList
                     position={'bottom-left'}
                     alerts={this.state.alerts}
@@ -135,31 +225,6 @@ class Admin extends Component {
                                 </Nav>
                             </Navbar.Collapse>
                         </Navbar>
-                    </Row>
-                    
-                    <Row style={{padding:'20px 5% 0px 5%', margin:'0px'}} fluid>
-                        <Card style={{width:'100%'}}>
-                            <Card.Header><h3>Upload de XML</h3></Card.Header>
-                            <Card.Body>
-                                <Breadcrumb>
-                                    <Breadcrumb.Item>Admin</Breadcrumb.Item>
-                                    <Breadcrumb.Item active>Upload XML</Breadcrumb.Item>
-                                </Breadcrumb>
-                                <Card.Text style={{padding:'10px',textAlign:'justify'}}>
-                                    Aqui você pode fazer o upload dos seus arquivos xml para que o nosso sistema possa processá-lo. Basta incluir os arquivos, clicar em Fazer upload e esperar a mágica acontecer.
-                                </Card.Text>
-                                <Form style={{width:'100%'}}>
-                                    <Form.File 
-                                        id="custom-file"
-                                        label={this.state.label}
-                                        onChange={this.fileSelectHandler}
-                                        style={{width:'100%'}}
-                                        custom
-                                    />
-                                </Form>
-                                <Button style={{marginTop:'10px'}} variant="primary" onClick={this.fileUploadHandler}>Fazer upload</Button>
-                            </Card.Body>
-                        </Card>
                     </Row>
 
                     <Row style={{padding:'20px 5% 0px 5%', margin:'0px'}} fluid>
@@ -190,6 +255,31 @@ class Admin extends Component {
                                     </>
                                     }
                                 </Table>
+                            </Card.Body>
+                        </Card>
+                    </Row>
+                    
+                    <Row style={{padding:'20px 5% 0px 5%', margin:'0px'}} fluid>
+                        <Card style={{width:'100%'}}>
+                            <Card.Header><h3>Upload de XML</h3></Card.Header>
+                            <Card.Body>
+                                <Breadcrumb>
+                                    <Breadcrumb.Item>Admin</Breadcrumb.Item>
+                                    <Breadcrumb.Item active>Upload XML</Breadcrumb.Item>
+                                </Breadcrumb>
+                                <Card.Text style={{padding:'10px',textAlign:'justify'}}>
+                                    Aqui você pode fazer o upload dos seus arquivos xml para que o nosso sistema possa processá-lo. Basta incluir os arquivos, clicar em Fazer upload e esperar a mágica acontecer.
+                                </Card.Text>
+                                <Form style={{width:'100%'}}>
+                                    <Form.File 
+                                        id="custom-file"
+                                        label={this.state.label}
+                                        onChange={this.fileSelectHandler}
+                                        style={{width:'100%'}}
+                                        custom
+                                    />
+                                </Form>
+                                <Button style={{marginTop:'10px'}} variant="primary" onClick={this.fileUploadHandler}>Fazer upload</Button>
                             </Card.Body>
                         </Card>
                     </Row>
